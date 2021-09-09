@@ -5,29 +5,26 @@ export interface ExtFileEntry {
   modificationDate: number;
 }
 export interface ExternalFilesPlugin {
-  dirChooser(): Promise<{ rootDir: string }>;
+  dirChooser(): Promise<{ root: string }>;
   readDir(options: {
-    rootDir: string;
+    root: string;
     path: string;
   }): Promise<{ files: ExtFileEntry[] }>;
-  readFile(options: {
-    rootDir: string;
-    path: string;
-  }): Promise<{ data: string }>;
+  readFile(options: { root: string; path: string }): Promise<{ data: string }>;
   readFileBinary(options: {
-    rootDir: string;
+    root: string;
     path: string;
   }): Promise<{ data: number[] }>;
-  delete(options: { rootDir: string; path: string }): Promise<void>;
-  createDir(options: { rootDir: string; path: string }): Promise<void>;
+  delete(options: { root: string; path: string }): Promise<void>;
+  createDir(options: { root: string; path: string }): Promise<void>;
   writeFile(options: {
-    rootDir: string;
+    root: string;
     path: string;
     data: string;
   }): Promise<void>;
   copyAssetDir(options: {
     assetPath: string;
-    rootDir: string;
+    root: string;
     path: string;
   }): Promise<void>;
 }

@@ -42,12 +42,12 @@ dirChooser() => any
 ### readDir(...)
 
 ```typescript
-readDir(options: { rootDir: string; path: string; }) => any
+readDir(options: { root: string; path: string; }) => any
 ```
 
-| Param         | Type                                            |
-| ------------- | ----------------------------------------------- |
-| **`options`** | <code>{ rootDir: string; path: string; }</code> |
+| Param         | Type                                         |
+| ------------- | -------------------------------------------- |
+| **`options`** | <code>{ root: string; path: string; }</code> |
 
 **Returns:** <code>any</code>
 
@@ -57,12 +57,12 @@ readDir(options: { rootDir: string; path: string; }) => any
 ### readFile(...)
 
 ```typescript
-readFile(options: { rootDir: string; path: string; }) => any
+readFile(options: { root: string; path: string; }) => any
 ```
 
-| Param         | Type                                            |
-| ------------- | ----------------------------------------------- |
-| **`options`** | <code>{ rootDir: string; path: string; }</code> |
+| Param         | Type                                         |
+| ------------- | -------------------------------------------- |
+| **`options`** | <code>{ root: string; path: string; }</code> |
 
 **Returns:** <code>any</code>
 
@@ -72,12 +72,12 @@ readFile(options: { rootDir: string; path: string; }) => any
 ### readFileBinary(...)
 
 ```typescript
-readFileBinary(options: { rootDir: string; path: string; }) => any
+readFileBinary(options: { root: string; path: string; }) => any
 ```
 
-| Param         | Type                                            |
-| ------------- | ----------------------------------------------- |
-| **`options`** | <code>{ rootDir: string; path: string; }</code> |
+| Param         | Type                                         |
+| ------------- | -------------------------------------------- |
+| **`options`** | <code>{ root: string; path: string; }</code> |
 
 **Returns:** <code>any</code>
 
@@ -87,12 +87,12 @@ readFileBinary(options: { rootDir: string; path: string; }) => any
 ### delete(...)
 
 ```typescript
-delete(options: { rootDir: string; path: string; }) => any
+delete(options: { root: string; path: string; }) => any
 ```
 
-| Param         | Type                                            |
-| ------------- | ----------------------------------------------- |
-| **`options`** | <code>{ rootDir: string; path: string; }</code> |
+| Param         | Type                                         |
+| ------------- | -------------------------------------------- |
+| **`options`** | <code>{ root: string; path: string; }</code> |
 
 **Returns:** <code>any</code>
 
@@ -102,12 +102,12 @@ delete(options: { rootDir: string; path: string; }) => any
 ### createDir(...)
 
 ```typescript
-createDir(options: { rootDir: string; path: string; }) => any
+createDir(options: { root: string; path: string; }) => any
 ```
 
-| Param         | Type                                            |
-| ------------- | ----------------------------------------------- |
-| **`options`** | <code>{ rootDir: string; path: string; }</code> |
+| Param         | Type                                         |
+| ------------- | -------------------------------------------- |
+| **`options`** | <code>{ root: string; path: string; }</code> |
 
 **Returns:** <code>any</code>
 
@@ -117,12 +117,12 @@ createDir(options: { rootDir: string; path: string; }) => any
 ### writeFile(...)
 
 ```typescript
-writeFile(options: { rootDir: string; path: string; data: string; }) => any
+writeFile(options: { root: string; path: string; data: string; }) => any
 ```
 
-| Param         | Type                                                          |
-| ------------- | ------------------------------------------------------------- |
-| **`options`** | <code>{ rootDir: string; path: string; data: string; }</code> |
+| Param         | Type                                                       |
+| ------------- | ---------------------------------------------------------- |
+| **`options`** | <code>{ root: string; path: string; data: string; }</code> |
 
 **Returns:** <code>any</code>
 
@@ -132,12 +132,12 @@ writeFile(options: { rootDir: string; path: string; data: string; }) => any
 ### copyAssetDir(...)
 
 ```typescript
-copyAssetDir(options: { rootDir: string; assetPath: string; path: string; }) => any
+copyAssetDir(options: { assetPath: string; root: string; path: string; }) => any
 ```
 
-| Param         | Type                                                               |
-| ------------- | ------------------------------------------------------------------ |
-| **`options`** | <code>{ rootDir: string; assetPath: string; path: string; }</code> |
+| Param         | Type                                                            |
+| ------------- | --------------------------------------------------------------- |
+| **`options`** | <code>{ assetPath: string; root: string; path: string; }</code> |
 
 **Returns:** <code>any</code>
 

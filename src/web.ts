@@ -5,42 +5,39 @@ import type { ExternalFilesPlugin, ExtFileEntry } from './definitions';
 
 export class ExternalFilesWeb extends WebPlugin implements ExternalFilesPlugin {
   async dirChooser(): Promise<{
-    rootDir: string;
+    root: string;
   }> {
     throw this.unimplemented('Not implemented on web.');
   }
 
   async readDir(options: {
-    rootDir: string;
+    root: string;
     path: string;
   }): Promise<{ files: ExtFileEntry[] }> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  readFile(options: {
-    rootDir: string;
-    path: string;
-  }): Promise<{ data: string }> {
+  readFile(options: { root: string; path: string }): Promise<{ data: string }> {
     throw this.unimplemented('Not implemented on web.');
   }
 
   readFileBinary(options: {
-    rootDir: string;
+    root: string;
     path: string;
   }): Promise<{ data: number[] }> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  delete(options: { rootDir: string; path: string }): Promise<void> {
+  delete(options: { root: string; path: string }): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  createDir(options: { rootDir: string; path: string }): Promise<void> {
+  createDir(options: { root: string; path: string }): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
 
   writeFile(options: {
-    rootDir: string;
+    root: string;
     path: string;
     data: string;
   }): Promise<void> {
@@ -49,7 +46,7 @@ export class ExternalFilesWeb extends WebPlugin implements ExternalFilesPlugin {
 
   copyAssetDir(options: {
     assetPath: string;
-    rootDir: string;
+    root: string;
     path: string;
   }): Promise<void> {
     throw this.unimplemented('Not implemented on web.');

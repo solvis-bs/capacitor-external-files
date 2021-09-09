@@ -20,8 +20,6 @@ import org.json.JSONException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-
-
 @CapacitorPlugin(name = "ExternalFiles")
 public class ExternalFilesPlugin extends Plugin {
 
@@ -40,12 +38,12 @@ public class ExternalFilesPlugin extends Plugin {
 
     @PluginMethod
     public void readDir(PluginCall call) {
-        String rootDir = call.getString("rootDir");
+        String root = call.getString("root");
         String path = call.getString("path");
 
-        if (rootDir == null) {
-            Logger.error(getLogTag(), "No rootDir retrieved from call", null);
-            call.reject("NO_ROOT_DIR");
+        if (root == null) {
+            Logger.error(getLogTag(), "No root retrieved from call", null);
+            call.reject("NO_ROOT");
             return;
         }
         if (path == null) {
@@ -55,7 +53,7 @@ public class ExternalFilesPlugin extends Plugin {
         }
 
         try {
-            FileExternalEntry dirFile = implementation.getExternalEntry(rootDir, path);
+            FileExternalEntry dirFile = implementation.getExternalEntry(root, path);
             JSONArray files = implementation.listDir(dirFile);
 
             JSObject ret = new JSObject();
@@ -68,12 +66,12 @@ public class ExternalFilesPlugin extends Plugin {
 
     @PluginMethod
     public void readFile(PluginCall call) {
-        String rootDir = call.getString("rootDir");
+        String root = call.getString("root");
         String path = call.getString("path");
 
-        if (rootDir == null) {
-            Logger.error(getLogTag(), "No rootDir retrieved from call", null);
-            call.reject("NO_ROOT_DIR");
+        if (root == null) {
+            Logger.error(getLogTag(), "No root retrieved from call", null);
+            call.reject("NO_ROOT");
             return;
         }
         if (path == null) {
@@ -83,7 +81,7 @@ public class ExternalFilesPlugin extends Plugin {
         }
 
         try {
-            FileExternalEntry file = implementation.getExternalEntry(rootDir, path);
+            FileExternalEntry file = implementation.getExternalEntry(root, path);
             String data = implementation.readFile(file);
             JSObject ret = new JSObject();
             ret.put("data", data);
@@ -95,12 +93,12 @@ public class ExternalFilesPlugin extends Plugin {
 
     @PluginMethod
     public void readFileBinary(PluginCall call) {
-        String rootDir = call.getString("rootDir");
+        String root = call.getString("root");
         String path = call.getString("path");
 
-        if (rootDir == null) {
-            Logger.error(getLogTag(), "No rootDir retrieved from call", null);
-            call.reject("NO_ROOT_DIR");
+        if (root == null) {
+            Logger.error(getLogTag(), "No root retrieved from call", null);
+            call.reject("NO_ROOT");
             return;
         }
         if (path == null) {
@@ -110,24 +108,24 @@ public class ExternalFilesPlugin extends Plugin {
         }
 
         try {
-            FileExternalEntry file = implementation.getExternalEntry(rootDir, path);
+            FileExternalEntry file = implementation.getExternalEntry(root, path);
             byte[] data = implementation.readFileBinary(file);
             JSObject ret = new JSObject();
             ret.put("data", data);
             call.resolve(ret);
-        } catch ( IOException | NullPointerException e) {
+        } catch (IOException | NullPointerException e) {
             call.reject(e.getMessage());
         }
     }
 
     @PluginMethod
     public void delete(PluginCall call) {
-        String rootDir = call.getString("rootDir");
+        String root = call.getString("root");
         String path = call.getString("path");
 
-        if (rootDir == null) {
-            Logger.error(getLogTag(), "No rootDir retrieved from call", null);
-            call.reject("NO_ROOT_DIR");
+        if (root == null) {
+            Logger.error(getLogTag(), "No root retrieved from call", null);
+            call.reject("NO_ROOT");
             return;
         }
         if (path == null) {
@@ -137,22 +135,22 @@ public class ExternalFilesPlugin extends Plugin {
         }
 
         try {
-            FileExternalEntry file = implementation.getExternalEntry(rootDir, path);
+            FileExternalEntry file = implementation.getExternalEntry(root, path);
             implementation.delete(file);
             call.resolve();
-        }  catch (IOException e) {
+        } catch (IOException e) {
             call.reject(e.getMessage());
         }
     }
 
     @PluginMethod
     public void createDir(PluginCall call) {
-        String rootDir = call.getString("rootDir");
+        String root = call.getString("root");
         String path = call.getString("path");
 
-        if (rootDir == null) {
-            Logger.error(getLogTag(), "No rootDir retrieved from call", null);
-            call.reject("NO_ROOT_DIR");
+        if (root == null) {
+            Logger.error(getLogTag(), "No root retrieved from call", null);
+            call.reject("NO_ROOT");
             return;
         }
         if (path == null) {
@@ -162,23 +160,22 @@ public class ExternalFilesPlugin extends Plugin {
         }
 
         try {
-            implementation.createDir(rootDir, path);
+            implementation.createDir(root, path);
             call.resolve();
-        }  catch (IOException e) {
+        } catch (IOException e) {
             call.reject(e.getMessage());
         }
     }
 
     @PluginMethod
     public void writeFile(PluginCall call) {
-        String rootDir = call.getString("rootDir");
+        String root = call.getString("root");
         String path = call.getString("path");
         String data = call.getString("data");
 
-
-        if (rootDir == null) {
-            Logger.error(getLogTag(), "No rootDir retrieved from call", null);
-            call.reject("NO_ROOT_DIR");
+        if (root == null) {
+            Logger.error(getLogTag(), "No root retrieved from call", null);
+            call.reject("NO_ROOT");
             return;
         }
         if (path == null) {
@@ -193,23 +190,22 @@ public class ExternalFilesPlugin extends Plugin {
         }
 
         try {
-            implementation.writeFile(rootDir, path, data);
+            implementation.writeFile(root, path, data);
             call.resolve();
-        }  catch (IOException e) {
+        } catch (IOException e) {
             call.reject(e.getMessage());
         }
     }
 
     @PluginMethod
     public void copyAssetDir(PluginCall call) {
-        String rootDir = call.getString("rootDir");
+        String root = call.getString("root");
         String path = call.getString("path");
         String assetPath = call.getString("assetPath");
 
-
-        if (rootDir == null) {
-            Logger.error(getLogTag(), "No rootDir retrieved from call", null);
-            call.reject("NO_ROOT_DIR");
+        if (root == null) {
+            Logger.error(getLogTag(), "No root retrieved from call", null);
+            call.reject("NO_ROOT");
             return;
         }
         if (path == null) {
@@ -224,11 +220,11 @@ public class ExternalFilesPlugin extends Plugin {
         }
 
         try {
-            implementation.createDir(rootDir, path);
-            FileExternalEntry targetDir = implementation.getExternalEntry(rootDir, path);
+            implementation.createDir(root, path);
+            FileExternalEntry targetDir = implementation.getExternalEntry(root, path);
             implementation.copyAssetDir(assetPath, targetDir);
             call.resolve();
-        }  catch (IOException e) {
+        } catch (IOException e) {
             call.reject(e.getMessage());
         }
     }
@@ -245,7 +241,7 @@ public class ExternalFilesPlugin extends Plugin {
             if (data != null) {
                 Uri uri = data.getData();
                 JSObject ret = new JSObject();
-                ret.put("rootDir", uri.toString());
+                ret.put("root", uri.toString());
                 call.resolve(ret);
             }
         }

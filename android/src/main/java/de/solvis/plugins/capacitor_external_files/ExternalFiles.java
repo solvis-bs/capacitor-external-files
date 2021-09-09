@@ -25,22 +25,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 class FileExternalEntry {
+
     public DocumentFile fileEntry;
-    public String rootUri;
+    public String root;
     public String path;
 }
 
 public class ExternalFiles {
 
-    final private Context context;
+    private final Context context;
 
-    ExternalFiles(Context context) {this.context = context;}
+    ExternalFiles(Context context) {
+        this.context = context;
+    }
 
-    FileExternalEntry getExternalEntry(String rootUri, String path) throws FileNotFoundException {
+    FileExternalEntry getExternalEntry(String root, String path) throws FileNotFoundException {
         FileExternalEntry resultEntry = new FileExternalEntry();
-        resultEntry.rootUri = rootUri;
+        resultEntry.root = root;
         resultEntry.path = path;
-        resultEntry.fileEntry = DocumentFile.fromTreeUri(context, Uri.parse(rootUri));
+        resultEntry.fileEntry = DocumentFile.fromTreeUri(context, Uri.parse(root));
 
         if (!path.equals("")) {
             String[] parts = path.split("/");
@@ -125,57 +128,56 @@ public class ExternalFiles {
         return os.toByteArray();
     }
 
-    void delete(FileExternalEntry file) throws IOException{
-        if(!file.fileEntry.delete()){
+    void delete(FileExternalEntry file) throws IOException {
+        if (!file.fileEntry.delete()) {
             throw new IOException("Failed to delete file");
         }
     }
 
-    DocumentFile createDir(String rootDir, String path) throws IOException {
-        FileExternalEntry rootDirEntry = getExternalEntry(rootDir, "");
-        DocumentFile fileEntry = rootDirEntry.fileEntry;
-        if(fileEntry == null) throw new FileNotFoundException("Invalid root dir");
-        if(path.equals("")) return fileEntry;
+    DocumentFile createDir(String root, String path) throws IOException {
+        FileExternalEntry rootEntry = getExternalEntry(root, "");
+        DocumentFile fileEntry = rootEntry.fileEntry;
+        if (fileEntry == null) throw new FileNotFoundException("Invalid root dir");
+        if (path.equals("")) return fileEntry;
 
         String[] parts = path.split("/");
 
-        for(String part: parts) {
+        for (String part : parts) {
             DocumentFile existingFileEntry = fileEntry.findFile(part);
 
-            if(existingFileEntry != null){
-                if(existingFileEntry.isFile()) {
+            if (existingFileEntry != null) {
+                if (existingFileEntry.isFile()) {
                     throw new IOException("Cannot create dir. File with same name exists");
                 }
                 fileEntry = existingFileEntry;
-            }
-            else fileEntry = fileEntry.createDirectory(part);
-            if(fileEntry == null) throw new IOException("Failed to create dir");
+            } else fileEntry = fileEntry.createDirectory(part);
+            if (fileEntry == null) throw new IOException("Failed to create dir");
         }
 
         return fileEntry;
     }
 
-    void writeFile(String rootDir, String path, String data) throws IOException {
-        if(path.equals("")) throw new IOException("Invalid path");
+    void writeFile(String root, String path, String data) throws IOException {
+        if (path.equals("")) throw new IOException("Invalid path");
         String[] parts = path.split("/");
-        String[] pathParts = Arrays.copyOfRange(parts, 0, parts.length-1);
-        String fileName = parts[parts.length-1];
+        String[] pathParts = Arrays.copyOfRange(parts, 0, parts.length - 1);
+        String fileName = parts[parts.length - 1];
 
         String filePath = TextUtils.join("/", pathParts);
-        DocumentFile dirFileEntry = createDir(rootDir, filePath);
+        DocumentFile dirFileEntry = createDir(root, filePath);
 
         InputStream is = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
 
         ContentResolver contentResolver = context.getContentResolver();
         DocumentFile file = dirFileEntry.createFile("text/plain", fileName);
-        if(file == null) throw new IOException("Failed to create file");
+        if (file == null) throw new IOException("Failed to create file");
         OutputStream os = contentResolver.openOutputStream(file.getUri());
 
         copyInputToOutputStream(is, os);
     }
 
-    void copyAssetDir(String assetPath, FileExternalEntry target)throws IOException {
-        if(!target.fileEntry.isDirectory()) {
+    void copyAssetDir(String assetPath, FileExternalEntry target) throws IOException {
+        if (!target.fileEntry.isDirectory()) {
             throw new IOException("Not a directory");
         }
 
@@ -186,7 +188,7 @@ public class ExternalFiles {
     }
 
     private void copyInputToOutputStream(InputStream is, OutputStream os) throws IOException {
-        byte[] buffer = new byte[1024*32];
+        byte[] buffer = new byte[1024 * 32];
         int bytesRead;
 
         while ((bytesRead = is.read(buffer)) != -1) {
@@ -197,17 +199,16 @@ public class ExternalFiles {
         os.close();
     }
 
-    private  void copyAssets(ContentResolver ctx, AssetManager asm, String assetPath, DocumentFile target) throws IOException {
+    private void copyAssets(ContentResolver ctx, AssetManager asm, String assetPath, DocumentFile target) throws IOException {
         String[] assets = asm.list(assetPath);
 
-        if(assets.length == 0){
+        if (assets.length == 0) {
             copyAssetFile(ctx, asm, assetPath, target);
-        }
-        else{
+        } else {
             String dirName = new File(assetPath).getName();
 
             DocumentFile subDir = target.findFile(dirName);
-            if(subDir == null) {
+            if (subDir == null) {
                 subDir = target.createDirectory(dirName);
             }
 
@@ -217,7 +218,7 @@ public class ExternalFiles {
         }
     }
 
-    private  void copyAssetFile(ContentResolver ctx, AssetManager asm,String assetPath, DocumentFile target) throws IOException {
+    private void copyAssetFile(ContentResolver ctx, AssetManager asm, String assetPath, DocumentFile target) throws IOException {
         File assetFile = new File(assetPath);
         Uri uri = Uri.fromFile(assetFile);
         ContentResolver contentResolver = context.getContentResolver();
@@ -226,15 +227,14 @@ public class ExternalFiles {
         InputStream is = asm.open(assetPath);
 
         DocumentFile targetFile = target.findFile(fileName);
-        if(targetFile != null) {
+        if (targetFile != null) {
             targetFile.delete();
         }
 
         targetFile = target.createFile(mime, fileName);
-        if(targetFile == null) throw new IOException("Failed to create file");
+        if (targetFile == null) throw new IOException("Failed to create file");
 
         OutputStream os = ctx.openOutputStream(targetFile.getUri());
-
 
         copyInputToOutputStream(is, os);
     }
