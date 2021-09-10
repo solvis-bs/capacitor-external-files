@@ -237,9 +237,10 @@ public class ExternalFilesPlugin extends Plugin {
 
         int resultCode = result.getResultCode();
         if (resultCode == Activity.RESULT_OK) {
-            Intent data = result.getData();
-            if (data != null) {
-                Uri uri = data.getData();
+            Intent intent = result.getData();
+            if (intent != null) {
+                DocumentFile externalFile = DocumentFile.fromTreeUri(getContext(), intent.getData());
+                Uri uri = externalFile.getUri();
                 JSObject ret = new JSObject();
                 ret.put("root", uri.toString());
                 call.resolve(ret);
