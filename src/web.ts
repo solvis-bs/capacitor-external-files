@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { WebPlugin } from '@capacitor/core';
 
-import type { ExternalFilesPlugin, ExtFileEntry } from './definitions';
+import type {
+  Encoding,
+  ExternalFilesPlugin,
+  ExtFileEntry,
+} from './definitions';
 
 export class ExternalFilesWeb extends WebPlugin implements ExternalFilesPlugin {
   async dirChooser(): Promise<{
@@ -17,14 +21,18 @@ export class ExternalFilesWeb extends WebPlugin implements ExternalFilesPlugin {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  readFile(options: { root: string; path: string }): Promise<{ data: string }> {
+  getFileEntry(options: {
+    root: string;
+    path: string;
+  }): Promise<{ file: ExtFileEntry }> {
     throw this.unimplemented('Not implemented on web.');
   }
 
-  readFileBinary(options: {
+  readFile(options: {
     root: string;
     path: string;
-  }): Promise<{ data: number[] }> {
+    encoding?: Encoding;
+  }): Promise<{ data: string }> {
     throw this.unimplemented('Not implemented on web.');
   }
 

@@ -15,13 +15,14 @@ npx cap sync
 
 * [`dirChooser()`](#dirchooser)
 * [`readDir(...)`](#readdir)
+* [`getFileEntry(...)`](#getfileentry)
 * [`readFile(...)`](#readfile)
-* [`readFileBinary(...)`](#readfilebinary)
 * [`delete(...)`](#delete)
 * [`createDir(...)`](#createdir)
 * [`writeFile(...)`](#writefile)
 * [`copyAssetDir(...)`](#copyassetdir)
 * [Interfaces](#interfaces)
+* [Enums](#enums)
 
 </docgen-index>
 
@@ -54,10 +55,10 @@ readDir(options: { root: string; path: string; }) => any
 --------------------
 
 
-### readFile(...)
+### getFileEntry(...)
 
 ```typescript
-readFile(options: { root: string; path: string; }) => any
+getFileEntry(options: { root: string; path: string; }) => any
 ```
 
 | Param         | Type                                         |
@@ -69,15 +70,15 @@ readFile(options: { root: string; path: string; }) => any
 --------------------
 
 
-### readFileBinary(...)
+### readFile(...)
 
 ```typescript
-readFileBinary(options: { root: string; path: string; }) => any
+readFile(options: { root: string; path: string; encoding?: Encoding; }) => any
 ```
 
-| Param         | Type                                         |
-| ------------- | -------------------------------------------- |
-| **`options`** | <code>{ root: string; path: string; }</code> |
+| Param         | Type                                                                                      |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ root: string; path: string; encoding?: <a href="#encoding">Encoding</a>; }</code> |
 
 **Returns:** <code>any</code>
 
@@ -155,5 +156,18 @@ copyAssetDir(options: { assetPath: string; root: string; path: string; }) => any
 | **`name`**             | <code>string</code>                |
 | **`kind`**             | <code>"file" \| "directory"</code> |
 | **`modificationDate`** | <code>number</code>                |
+
+
+### Enums
+
+
+#### Encoding
+
+| Members          | Value                    |
+| ---------------- | ------------------------ |
+| **`UTF8`**       | <code>'utf8'</code>      |
+| **`ASCII`**      | <code>'ascii'</code>     |
+| **`UTF16`**      | <code>'utf16'</code>     |
+| **`ISO_8859_1`** | <code>'iso8859-1'</code> |
 
 </docgen-api>

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.Base64;
 
 import androidx.documentfile.provider.DocumentFile;
 
@@ -12,23 +13,28 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-class FileExternalEntry {
-
+class ExternalFilesEntry {
     public DocumentFile fileEntry;
     public String root;
     public String path;
+
+    ExternalFilesEntry(DocumentFile fileEntry, String root, String path){
+        this.fileEntry = fileEntry;
+        this.root =root;
+        this.path = path;
+    }
 }
 
 public class ExternalFiles {
@@ -39,11 +45,9 @@ public class ExternalFiles {
         this.context = context;
     }
 
-    FileExternalEntry getExternalEntry(String root, String path) throws FileNotFoundException {
-        FileExternalEntry resultEntry = new FileExternalEntry();
-        resultEntry.root = root;
-        resultEntry.path = path;
-        resultEntry.fileEntry = DocumentFile.fromTreeUri(context, Uri.parse(root));
+    ExternalFilesEntry getExternalEntry(String root, String path) throws FileNotFoundException {
+        DocumentFile fileEntry = DocumentFile.fromTreeUri(context, Uri.parse(root));
+        ExternalFilesEntry resultEntry = new ExternalFilesEntry(fileEntry, root, path);
 
         if (!path.equals("")) {
             String[] parts = path.split("/");
@@ -61,7 +65,7 @@ public class ExternalFiles {
         return resultEntry;
     }
 
-    JSONArray listDir(FileExternalEntry sourceDir) throws FileNotFoundException, JSONException {
+    JSONArray listDir(ExternalFilesEntry sourceDir) throws FileNotFoundException, JSONException {
         if (!sourceDir.fileEntry.isDirectory()) {
             throw new FileNotFoundException("Source path is not a directory");
         }
@@ -85,57 +89,30 @@ public class ExternalFiles {
         return filesDataJson;
     }
 
-    String readFile(FileExternalEntry file) throws IOException {
+    String readFile(ExternalFilesEntry file, Charset charset) throws IOException {
         if (!file.fileEntry.isFile()) {
             throw new FileNotFoundException("File entry is not a file");
         }
 
         ContentResolver contentResolver = context.getContentResolver();
         InputStream is = contentResolver.openInputStream(file.fileEntry.getUri());
-
-        BufferedReader r = new BufferedReader(new InputStreamReader(is));
-        StringBuilder content = new StringBuilder();
-        int value;
-        while ((value = r.read()) != -1) {
-            char c = (char) value;
-            content.append(c);
+        String dataString;
+        if (charset != null) {
+            dataString = readFileAsString(is, charset.name());
+        } else {
+            dataString = readFileAsBase64EncodedData(is);
         }
-
-        is.close();
-
-        return content.toString();
+        return dataString;
     }
 
-    byte[] readFileBinary(FileExternalEntry file) throws IOException {
-        if (!file.fileEntry.isFile()) {
-            throw new FileNotFoundException("File entry is not a file");
-        }
-
-        ContentResolver ctx = context.getContentResolver();
-        InputStream is = ctx.openInputStream(file.fileEntry.getUri());
-
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024 * 32];
-        int bytesRead;
-
-        while ((bytesRead = is.read(buffer)) != -1) {
-            os.write(buffer, 0, bytesRead);
-        }
-
-        is.close();
-        os.close();
-
-        return os.toByteArray();
-    }
-
-    void delete(FileExternalEntry file) throws IOException {
+    void delete(ExternalFilesEntry file) throws IOException {
         if (!file.fileEntry.delete()) {
             throw new IOException("Failed to delete file");
         }
     }
 
     DocumentFile createDir(String root, String path) throws IOException {
-        FileExternalEntry rootEntry = getExternalEntry(root, "");
+        ExternalFilesEntry rootEntry = getExternalEntry(root, "");
         DocumentFile fileEntry = rootEntry.fileEntry;
         if (fileEntry == null) throw new FileNotFoundException("Invalid root dir");
         if (path.equals("")) return fileEntry;
@@ -176,7 +153,7 @@ public class ExternalFiles {
         copyInputToOutputStream(is, os);
     }
 
-    void copyAssetDir(String assetPath, FileExternalEntry target) throws IOException {
+    void copyAssetDir(String assetPath, ExternalFilesEntry target) throws IOException {
         if (!target.fileEntry.isDirectory()) {
             throw new IOException("Not a directory");
         }
@@ -185,6 +162,24 @@ public class ExternalFiles {
         AssetManager asm = context.getAssets();
 
         copyAssets(contentResolver, asm, assetPath, target.fileEntry);
+    }
+
+    Charset getEncoding(String encoding) {
+        if (encoding == null) {
+            return null;
+        }
+
+        switch (encoding) {
+            case "utf8":
+                return StandardCharsets.UTF_8;
+            case "utf16":
+                return StandardCharsets.UTF_16;
+            case "ascii":
+                return StandardCharsets.US_ASCII;
+            case "iso8859-1":
+                return StandardCharsets.ISO_8859_1;
+        }
+        return null;
     }
 
     private void copyInputToOutputStream(InputStream is, OutputStream os) throws IOException {
@@ -237,5 +232,33 @@ public class ExternalFiles {
         OutputStream os = ctx.openOutputStream(targetFile.getUri());
 
         copyInputToOutputStream(is, os);
+    }
+
+    private  String readFileAsString(InputStream is, String encoding) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int length;
+
+        while ((length = is.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, length);
+        }
+
+        return outputStream.toString(encoding);
+    }
+
+    private String readFileAsBase64EncodedData(InputStream is) throws IOException {
+        FileInputStream fileInputStreamReader = (FileInputStream) is;
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+
+        int c;
+        while ((c = fileInputStreamReader.read(buffer)) != -1) {
+            byteStream.write(buffer, 0, c);
+        }
+        fileInputStreamReader.close();
+
+        return Base64.encodeToString(byteStream.toByteArray(), Base64.NO_WRAP);
     }
 }

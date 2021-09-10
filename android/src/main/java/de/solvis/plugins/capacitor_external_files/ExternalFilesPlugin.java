@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import androidx.activity.result.ActivityResult;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Logger;
@@ -16,14 +17,20 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 @CapacitorPlugin(name = "ExternalFiles")
 public class ExternalFilesPlugin extends Plugin {
 
     private ExternalFiles implementation;
+
+    public static String InvalidInputErrCode = "INVALID_INPUT_ERROR";
+    public static String NotFoundErrCode = "NOT_FOUND_ERROR";
+    public static String IoErrCode = "IO_ERROR";
 
     @Override
     public void load() {
@@ -43,24 +50,64 @@ public class ExternalFilesPlugin extends Plugin {
 
         if (root == null) {
             Logger.error(getLogTag(), "No root retrieved from call", null);
-            call.reject("NO_ROOT");
+            call.reject("Invalid root", InvalidInputErrCode);
             return;
         }
         if (path == null) {
             Logger.error(getLogTag(), "No path retrieved from call", null);
-            call.reject("NO_PATH");
+            call.reject("Invalid path", InvalidInputErrCode);
             return;
         }
 
         try {
-            FileExternalEntry dirFile = implementation.getExternalEntry(root, path);
+            ExternalFilesEntry dirFile = implementation.getExternalEntry(root, path);
             JSONArray files = implementation.listDir(dirFile);
 
             JSObject ret = new JSObject();
             ret.put("files", files);
             call.resolve(ret);
-        } catch (FileNotFoundException | JSONException e) {
-            call.reject(e.getMessage());
+        } catch (FileNotFoundException e) {
+            call.reject(e.getMessage(), NotFoundErrCode, e);
+        } catch (JSONException e) {
+            call.reject(e.getMessage(), e);
+        }
+    }
+
+    @PluginMethod
+    public void getFileEntry(PluginCall call) {
+        String root = call.getString("root");
+        String path = call.getString("path");
+
+        if (root == null) {
+            Logger.error(getLogTag(), "No root retrieved from call", null);
+            call.reject("Invalid root", InvalidInputErrCode);
+            return;
+        }
+        if (path == null) {
+            Logger.error(getLogTag(), "No path retrieved from call", null);
+            call.reject("Invalid path", InvalidInputErrCode);
+            return;
+        }
+
+        try {
+            ExternalFilesEntry file = implementation.getExternalEntry(root, path);
+            JSONObject jsonObject = new JSONObject();
+            String kind = file.fileEntry.isFile() ? "file" : "directory";
+            String name = file.fileEntry.getName();
+            long modificationDate = file.fileEntry.lastModified();
+
+            jsonObject.put("path", file.path);
+            jsonObject.put("name", name);
+            jsonObject.put("kind", kind);
+            jsonObject.put("modificationDate", modificationDate);
+
+            JSObject ret = new JSObject();
+            ret.put("file", jsonObject);
+            call.resolve(ret);
+        } catch (FileNotFoundException  e) {
+            call.reject(e.getMessage(), NotFoundErrCode, e);
+        } catch ( JSONException e) {
+            call.reject(e.getMessage(), e);
         }
     }
 
@@ -68,53 +115,35 @@ public class ExternalFilesPlugin extends Plugin {
     public void readFile(PluginCall call) {
         String root = call.getString("root");
         String path = call.getString("path");
+        String encoding = call.getString("encoding");
 
         if (root == null) {
             Logger.error(getLogTag(), "No root retrieved from call", null);
-            call.reject("NO_ROOT");
+            call.reject("Invalid root", InvalidInputErrCode);
             return;
         }
         if (path == null) {
             Logger.error(getLogTag(), "No path retrieved from call", null);
-            call.reject("NO_PATH");
+            call.reject("Invalid path", InvalidInputErrCode);
+            return;
+        }
+
+        Charset charset = implementation.getEncoding(encoding);
+        if (encoding != null && charset == null) {
+            call.reject("Unsupported encoding provided: " + encoding, InvalidInputErrCode);
             return;
         }
 
         try {
-            FileExternalEntry file = implementation.getExternalEntry(root, path);
-            String data = implementation.readFile(file);
+            ExternalFilesEntry file = implementation.getExternalEntry(root, path);
+            String data = implementation.readFile(file, charset);
             JSObject ret = new JSObject();
             ret.put("data", data);
             call.resolve(ret);
-        } catch (IOException | NullPointerException e) {
-            call.reject(e.getMessage());
-        }
-    }
-
-    @PluginMethod
-    public void readFileBinary(PluginCall call) {
-        String root = call.getString("root");
-        String path = call.getString("path");
-
-        if (root == null) {
-            Logger.error(getLogTag(), "No root retrieved from call", null);
-            call.reject("NO_ROOT");
-            return;
-        }
-        if (path == null) {
-            Logger.error(getLogTag(), "No path retrieved from call", null);
-            call.reject("NO_PATH");
-            return;
-        }
-
-        try {
-            FileExternalEntry file = implementation.getExternalEntry(root, path);
-            byte[] data = implementation.readFileBinary(file);
-            JSObject ret = new JSObject();
-            ret.put("data", data);
-            call.resolve(ret);
-        } catch (IOException | NullPointerException e) {
-            call.reject(e.getMessage());
+        } catch (FileNotFoundException e) {
+            call.reject(e.getMessage(), NotFoundErrCode, e);
+        } catch (IOException e) {
+            call.reject(e.getMessage(), IoErrCode, e);
         }
     }
 
@@ -125,21 +154,23 @@ public class ExternalFilesPlugin extends Plugin {
 
         if (root == null) {
             Logger.error(getLogTag(), "No root retrieved from call", null);
-            call.reject("NO_ROOT");
+            call.reject("Invalid root", InvalidInputErrCode);
             return;
         }
         if (path == null) {
             Logger.error(getLogTag(), "No path retrieved from call", null);
-            call.reject("NO_PATH");
+            call.reject("Invalid path", InvalidInputErrCode);
             return;
         }
 
         try {
-            FileExternalEntry file = implementation.getExternalEntry(root, path);
+            ExternalFilesEntry file = implementation.getExternalEntry(root, path);
             implementation.delete(file);
             call.resolve();
+        } catch (FileNotFoundException e) {
+            call.reject(e.getMessage(), NotFoundErrCode, e);
         } catch (IOException e) {
-            call.reject(e.getMessage());
+            call.reject(e.getMessage(), IoErrCode, e);
         }
     }
 
@@ -150,20 +181,22 @@ public class ExternalFilesPlugin extends Plugin {
 
         if (root == null) {
             Logger.error(getLogTag(), "No root retrieved from call", null);
-            call.reject("NO_ROOT");
+            call.reject("Invalid root", InvalidInputErrCode);
             return;
         }
         if (path == null) {
             Logger.error(getLogTag(), "No path retrieved from call", null);
-            call.reject("NO_PATH");
+            call.reject("Invalid path", InvalidInputErrCode);
             return;
         }
 
         try {
             implementation.createDir(root, path);
             call.resolve();
+        } catch (FileNotFoundException e) {
+            call.reject(e.getMessage(), NotFoundErrCode, e);
         } catch (IOException e) {
-            call.reject(e.getMessage());
+            call.reject(e.getMessage(), IoErrCode, e);
         }
     }
 
@@ -175,12 +208,12 @@ public class ExternalFilesPlugin extends Plugin {
 
         if (root == null) {
             Logger.error(getLogTag(), "No root retrieved from call", null);
-            call.reject("NO_ROOT");
+            call.reject("Invalid root", InvalidInputErrCode);
             return;
         }
         if (path == null) {
             Logger.error(getLogTag(), "No path retrieved from call", null);
-            call.reject("NO_PATH");
+            call.reject("Invalid path", InvalidInputErrCode);
             return;
         }
         if (data == null) {
@@ -192,8 +225,10 @@ public class ExternalFilesPlugin extends Plugin {
         try {
             implementation.writeFile(root, path, data);
             call.resolve();
+        } catch (FileNotFoundException e) {
+            call.reject(e.getMessage(), NotFoundErrCode, e);
         } catch (IOException e) {
-            call.reject(e.getMessage());
+            call.reject(e.getMessage(), IoErrCode, e);
         }
     }
 
@@ -205,12 +240,12 @@ public class ExternalFilesPlugin extends Plugin {
 
         if (root == null) {
             Logger.error(getLogTag(), "No root retrieved from call", null);
-            call.reject("NO_ROOT");
+            call.reject("Invalid root", InvalidInputErrCode);
             return;
         }
         if (path == null) {
             Logger.error(getLogTag(), "No path retrieved from call", null);
-            call.reject("NO_PATH");
+            call.reject("Invalid path", InvalidInputErrCode);
             return;
         }
         if (assetPath == null) {
@@ -221,11 +256,13 @@ public class ExternalFilesPlugin extends Plugin {
 
         try {
             implementation.createDir(root, path);
-            FileExternalEntry targetDir = implementation.getExternalEntry(root, path);
+            ExternalFilesEntry targetDir = implementation.getExternalEntry(root, path);
             implementation.copyAssetDir(assetPath, targetDir);
             call.resolve();
+        } catch (FileNotFoundException e) {
+            call.reject(e.getMessage(), NotFoundErrCode, e);
         } catch (IOException e) {
-            call.reject(e.getMessage());
+            call.reject(e.getMessage(), IoErrCode, e);
         }
     }
 
