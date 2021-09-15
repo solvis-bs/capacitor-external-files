@@ -134,7 +134,7 @@ public class ExternalFiles {
         return fileEntry;
     }
 
-    void writeFile(String root, String path, String data) throws IOException {
+    void writeFile(String root, String path, String data, Charset charset) throws IOException {
         if (path.equals("")) throw new IOException("Invalid path");
         String[] parts = path.split("/");
         String[] pathParts = Arrays.copyOfRange(parts, 0, parts.length - 1);
@@ -143,14 +143,22 @@ public class ExternalFiles {
         String filePath = TextUtils.join("/", pathParts);
         DocumentFile dirFileEntry = createDir(root, filePath);
 
-        InputStream is = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
-
         ContentResolver contentResolver = context.getContentResolver();
         DocumentFile file = dirFileEntry.createFile("text/plain", fileName);
         if (file == null) throw new IOException("Failed to create file");
         OutputStream os = contentResolver.openOutputStream(file.getUri());
 
-        copyInputToOutputStream(is, os);
+        if (charset != null) {
+            InputStream is = new ByteArrayInputStream(data.getBytes(charset));
+            copyInputToOutputStream(is, os);
+        } else {
+            //remove header from dataURL
+            if (data.contains(",")) {
+                data = data.split(",")[1];
+            }
+            os.write(Base64.decode(data, Base64.NO_WRAP));
+            os.close();
+        }
     }
 
     void copyAssetDir(String assetPath, ExternalFilesEntry target) throws IOException {

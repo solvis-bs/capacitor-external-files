@@ -47,6 +47,14 @@ export interface ExternalFilesPlugin {
     root: string;
     path: string;
     data: string;
+    /**
+     * The encoding to write the file in. If not provided, data
+     * is written as base64 encoded.
+     *
+     * Pass Encoding.UTF8 to write data as string
+     *
+     */
+    encoding?: Encoding;
   }): Promise<void>;
   copyAssetDir(options: {
     assetPath: string;

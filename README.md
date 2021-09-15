@@ -118,12 +118,12 @@ createDir(options: { root: string; path: string; }) => any
 ### writeFile(...)
 
 ```typescript
-writeFile(options: { root: string; path: string; data: string; }) => any
+writeFile(options: { root: string; path: string; data: string; encoding?: Encoding; }) => any
 ```
 
-| Param         | Type                                                       |
-| ------------- | ---------------------------------------------------------- |
-| **`options`** | <code>{ root: string; path: string; data: string; }</code> |
+| Param         | Type                                                                                                    |
+| ------------- | ------------------------------------------------------------------------------------------------------- |
+| **`options`** | <code>{ root: string; path: string; data: string; encoding?: <a href="#encoding">Encoding</a>; }</code> |
 
 **Returns:** <code>any</code>
 

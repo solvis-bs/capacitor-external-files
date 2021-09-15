@@ -205,6 +205,13 @@ public class ExternalFilesPlugin extends Plugin {
         String root = call.getString("root");
         String path = call.getString("path");
         String data = call.getString("data");
+        String encoding = call.getString("encoding");
+
+        Charset charset = implementation.getEncoding(encoding);
+        if (encoding != null && charset == null) {
+            call.reject("Unsupported encoding provided: " + encoding);
+            return;
+        }
 
         if (root == null) {
             Logger.error(getLogTag(), "No root retrieved from call", null);
@@ -223,7 +230,7 @@ public class ExternalFilesPlugin extends Plugin {
         }
 
         try {
-            implementation.writeFile(root, path, data);
+            implementation.writeFile(root, path, data, charset);
             call.resolve();
         } catch (FileNotFoundException e) {
             call.reject(e.getMessage(), NotFoundErrCode, e);
@@ -277,6 +284,7 @@ public class ExternalFilesPlugin extends Plugin {
             Intent intent = result.getData();
             if (intent != null) {
                 DocumentFile externalFile = DocumentFile.fromTreeUri(getContext(), intent.getData());
+                if(externalFile == null) return;
                 Uri uri = externalFile.getUri();
                 JSObject ret = new JSObject();
                 ret.put("root", uri.toString());

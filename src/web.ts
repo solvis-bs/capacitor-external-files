@@ -48,6 +48,7 @@ export class ExternalFilesWeb extends WebPlugin implements ExternalFilesPlugin {
     root: string;
     path: string;
     data: string;
+    encoding?: Encoding;
   }): Promise<void> {
     throw this.unimplemented('Not implemented on web.');
   }
