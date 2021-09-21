@@ -40,6 +40,11 @@ public class ExternalFilesPlugin extends Plugin {
     @PluginMethod
     public void dirChooser(PluginCall call) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(
+            Intent.FLAG_GRANT_READ_URI_PERMISSION
+            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+            | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
         startActivityForResult(call, intent, "dirChooserResult");
     }
 
@@ -283,6 +288,11 @@ public class ExternalFilesPlugin extends Plugin {
         if (resultCode == Activity.RESULT_OK) {
             Intent intent = result.getData();
             if (intent != null) {
+                getContext().getContentResolver().takePersistableUriPermission(
+                     intent.getData(),
+                     (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                );
+
                 DocumentFile externalFile = DocumentFile.fromTreeUri(getContext(), intent.getData());
                 if(externalFile == null) return;
                 Uri uri = externalFile.getUri();
