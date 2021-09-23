@@ -31,6 +31,7 @@ public class ExternalFilesPlugin extends Plugin {
     public static String InvalidInputErrCode = "INVALID_INPUT_ERROR";
     public static String NotFoundErrCode = "NOT_FOUND_ERROR";
     public static String IoErrCode = "IO_ERROR";
+    public static String UserCanceledErrCode = "USER_CANCELED";
 
     @Override
     public void load() {
@@ -299,7 +300,7 @@ public class ExternalFilesPlugin extends Plugin {
                 JSObject ret = new JSObject();
                 ret.put("root", uri.toString());
                 call.resolve(ret);
-            }
-        }
+            } else call.reject("Error on folder select", IoErrCode);
+        } else call.reject("User canceled folder select", UserCanceledErrCode);
     }
 }
