@@ -120,6 +120,7 @@ public class ExternalFiles {
         String[] parts = path.split("/");
 
         for (String part : parts) {
+            if(part.isEmpty()) continue;
             DocumentFile existingFileEntry = fileEntry.findFile(part);
 
             if (existingFileEntry != null) {

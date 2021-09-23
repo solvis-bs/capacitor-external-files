@@ -1,6 +1,6 @@
 {
   "name": "capacitor-external-files",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Plugin to work with external files like on an external sd-card connected over USB-OTG.",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
