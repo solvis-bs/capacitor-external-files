@@ -16,6 +16,7 @@ export enum ErrorCodes {
   InvalidInputErrCode = 'INVALID_INPUT_ERROR',
   NotFoundErrCode = 'NOT_FOUND_ERROR',
   IoErrCode = 'IO_ERROR',
+  UserCanceledErrCode = 'USER_CANCELED',
 }
 
 export interface ExternalFilesPlugin {
